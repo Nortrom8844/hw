@@ -1,0 +1,109 @@
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Fetching 11 files: 100%|##########| 11/11 [00:00<00:00, 1224.81it/s]
+The config attributes {'timestep_values': None} were passed to DDIMScheduler, but are not expected and will be ignored. Please verify your scheduler_config.json configuration file.
++------------------------------- Traceback (most recent call last) --------------------------------+
+| E:\Python\env2\lib\site-packages\diffusers\modeling_utils.py:96 in load_state_dict               |
+|                                                                                                  |
+|    93     """                                                                                    |
+|    94     try:                                                                                   |
+|    95         if os.path.basename(checkpoint_file) == WEIGHTS_NAME:                              |
+| \u2771  96             return torch.load(checkpoint_file, map_location="cpu")                         |
+|    97         else:                                                                              |
+|    98             return safetensors.torch.load_file(checkpoint_file, device="cpu")              |
+|    99     except Exception as e:                                                                 |
+|                                                                                                  |
+| E:\Python\env2\lib\site-packages\torch\serialization.py:789 in load                              |
+|                                                                                                  |
+|    786                         return _load(opened_zipfile, map_location, _weights_only_unpickl  |
+|    787                     except RuntimeError as e:                                             |
+|    788                         raise pickle.UnpicklingError(UNSAFE_MESSAGE + str(e)) from None   |
+| \u2771  789                 return _load(opened_zipfile, map_location, pickle_module, **pickle_load_  |
+|    790         if weights_only:                                                                  |
+|    791             try:                                                                          |
+|    792                 return _legacy_load(opened_file, map_location, _weights_only_unpickler,   |
+|                                                                                                  |
+| E:\Python\env2\lib\site-packages\torch\serialization.py:1131 in _load                            |
+|                                                                                                  |
+|   1128                                                                                           |
+|   1129     unpickler = UnpicklerWrapper(data_file, **pickle_load_args)                           |
+|   1130     unpickler.persistent_load = persistent_load                                           |
+| \u2771 1131     result = unpickler.load()                                                             |
+|   1132                                                                                           |
+|   1133     torch._utils._validate_loaded_sparse_tensors()                                        |
+|   1134                                                                                           |
+|                                                                                                  |
+| E:\Python\env2\lib\site-packages\torch\serialization.py:1101 in persistent_load                  |
+|                                                                                                  |
+|   1098                                                                                           |
+|   1099         if key not in loaded_storages:                                                    |
+|   1100             nbytes = numel * torch._utils._element_size(dtype)                            |
+| \u2771 1101             load_tensor(dtype, nbytes, key, _maybe_decode_ascii(location))                |
+|   1102                                                                                           |
+|   1103         return loaded_storages[key]                                                       |
+|   1104                                                                                           |
+|                                                                                                  |
+| E:\Python\env2\lib\site-packages\torch\serialization.py:1079 in load_tensor                      |
+|                                                                                                  |
+|   1076     def load_tensor(dtype, numel, key, location):                                         |
+|   1077         name = f'data/{key}'                                                              |
+|   1078                                                                                           |
+| \u2771 1079         storage = zip_file.get_storage_from_record(name, numel, torch.UntypedStorage).st  |
+|   1080         # TODO: Once we decide to break serialization FC, we can                          |
+|   1081         # stop wrapping with TypedStorage                                                 |
+|   1082         loaded_storages[key] = torch.storage.TypedStorage(                                |
++--------------------------------------------------------------------------------------------------+
+RuntimeError: PytorchStreamReader failed reading file data/352: invalid header or archive is corrupted
+
+During handling of the above exception, another exception occurred:
+
++------------------------------- Traceback (most recent call last) --------------------------------+
+| E:\Python\env2\prog.py:6 in <module>                                                             |
+|                                                                                                  |
+|    3 model_id = "CompVis/ldm-text2im-large-256"                                                  |
+|    4                                                                                             |
+|    5 # load model and scheduler                                                                  |
+| \u2771  6 ldm = DiffusionPipeline.from_pretrained(model_id)                                           |
+|    7                                                                                             |
+|    8 import gc                                                                                   |
+|    9 gc.collect()                                                                                |
+|                                                                                                  |
+| E:\Python\env2\lib\site-packages\diffusers\pipeline_utils.py:708 in from_pretrained              |
+|                                                                                                  |
+|   705                                                                                            |
+|   706                 # check if the module is in a subdirectory                                 |
+|   707                 if os.path.isdir(os.path.join(cached_folder, name)):                       |
+| \u2771 708                     loaded_sub_model = load_method(os.path.join(cached_folder, name), **   |
+|   709                 else:                                                                      |
+|   710                     # else load from the root directory                                    |
+|   711                     loaded_sub_model = load_method(cached_folder, **loading_kwargs)        |
+|                                                                                                  |
+| E:\Python\env2\lib\site-packages\diffusers\modeling_utils.py:488 in from_pretrained              |
+|                                                                                                  |
+|   485             # if device_map is Non,e load the state dict on move the params from meta de   |
+|   486             if device_map is None:                                                         |
+|   487                 param_device = "cpu"                                                       |
+| \u2771 488                 state_dict = load_state_dict(model_file)                                   |
+|   489                 # move the parms from meta device to cpu                                   |
+|   490                 for param_name, param in state_dict.items():                               |
+|   491                     set_module_tensor_to_device(model, param_name, param_device, value=p   |
+|                                                                                                  |
+| E:\Python\env2\lib\site-packages\diffusers\modeling_utils.py:102 in load_state_dict              |
+|                                                                                                  |
+|    99     except Exception as e:                                                                 |
+|   100         try:                                                                               |
+|   101             with open(checkpoint_file) as f:                                               |
+| \u2771 102                 if f.read().startswith("version"):                                         |
+|   103                     raise OSError(                                                         |
+|   104                         "You seem to have cloned a repository without having git-lfs ins   |
+|   105                         "git-lfs and run `git lfs install` followed by `git lfs pull` in   |
+|                                                                                                  |
+| C:\Users\kashi\AppData\Local\Programs\Python\Python39\lib\encodings\cp1251.py:23 in decode       |
+|                                                                                                  |
+|    20                                                                                            |
+|    21 class IncrementalDecoder(codecs.IncrementalDecoder):                                       |
+|    22     def decode(self, input, final=False):                                                  |
+| \u2771  23         return codecs.charmap_decode(input,self.errors,decoding_table)[0]                  |
+|    24                                                                                            |
+|    25 class StreamWriter(Codec,codecs.StreamWriter):                                             |
+|    26     pass                                                                                   |
++--------------------------------------------------------------------------------------------------+
+MemoryError
